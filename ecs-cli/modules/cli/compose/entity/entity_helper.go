@@ -134,8 +134,12 @@ func createRegisterTaskDefinitionRequest(taskDefinition *ecs.TaskDefinition, tag
 		PlacementConstraints:    taskDefinition.PlacementConstraints,
 	}
 
+	if networkMode := taskDefinition.NetworkMode; aws.StringValue(networkMode) != "" {
+		request.NetworkMode = networkMode
+	}
+
 	// 2023-11 Unconditionally set somaxconns at the task ContainerDefinition level.
-	if len(taskDefinition.ContainerDefinitions) > 0 {
+	if len(taskDefinition.ContainerDefinitions)  > 0 && aws.StringValue(taskDefinition.NetworkMode)  == "awsvpc" {
 		for _, containerDefinition := range taskDefinition.ContainerDefinitions {
 			namespace := "net.core.somaxconn"
 			value := "2048"
@@ -147,10 +151,6 @@ func createRegisterTaskDefinitionRequest(taskDefinition *ecs.TaskDefinition, tag
 			containerDefinition.SetSystemControls(systemControls)
 		}
 
-	}
-
-	if networkMode := taskDefinition.NetworkMode; aws.StringValue(networkMode) != "" {
-		request.NetworkMode = networkMode
 	}
 
 	if cpu := taskDefinition.Cpu; aws.StringValue(cpu) != "" {
