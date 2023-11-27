@@ -138,7 +138,7 @@ func createRegisterTaskDefinitionRequest(taskDefinition *ecs.TaskDefinition, tag
 		request.NetworkMode = networkMode
 	}
 
-	// 2023-11 Unconditionally set somaxconns at the task ContainerDefinition level.
+	// 2023-11 Conditionally set somaxconns at the task ContainerDefinition level.
 	if len(taskDefinition.ContainerDefinitions)  > 0 && aws.StringValue(taskDefinition.NetworkMode)  == "awsvpc" {
 		for _, containerDefinition := range taskDefinition.ContainerDefinitions {
 			namespace := "net.core.somaxconn"
